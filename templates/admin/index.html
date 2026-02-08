@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Panel{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-gear me-2"></i>Admin Panel</h2>
+</div>
+
+<!-- Quick Stats -->
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <div class="card bg-primary bg-gradient">
+            <div class="card-body text-center">
+                <h3>{{ users|length }}</h3>
+                <span>Total Users</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-info bg-gradient">
+            <div class="card-body text-center">
+                <h3>{{ rules|length }}</h3>
+                <span>Detection Rules</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-success bg-gradient">
+            <div class="card-body text-center">
+                <h3>{{ total_logs }}</h3>
+                <span>Total Log Entries</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Admin Navigation -->
+<div class="row g-4">
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="bi bi-people display-4 text-primary mb-3"></i>
+                <h5>User Management</h5>
+                <p class="text-muted">Add, edit, or remove user accounts</p>
+                <a href="{{ url_for('admin.users') }}" class="btn btn-primary">
+                    <i class="bi bi-arrow-right me-2"></i>Manage Users
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="bi bi-shield-check display-4 text-info mb-3"></i>
+                <h5>Detection Rules</h5>
+                <p class="text-muted">Configure threat detection rules</p>
+                <a href="{{ url_for('admin.rules') }}" class="btn btn-info">
+                    <i class="bi bi-arrow-right me-2"></i>Manage Rules
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="bi bi-database display-4 text-success mb-3"></i>
+                <h5>Data Management</h5>
+                <p class="text-muted">Upload logs, backups, exports</p>
+                <a href="{{ url_for('admin.data') }}" class="btn btn-success">
+                    <i class="bi bi-arrow-right me-2"></i>Manage Data
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

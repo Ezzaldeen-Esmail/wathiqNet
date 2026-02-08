@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block title %}Alert Details{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-exclamation-triangle me-2"></i>Alert Details</h2>
+    <a href="{{ url_for('alerts.index') }}" class="btn btn-outline-light">
+        <i class="bi bi-arrow-left me-2"></i>Back to Alerts
+    </a>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Alert #{{ alert.id }}</h5>
+                {% if alert.severity == 'critical' %}
+                <span class="badge bg-danger fs-6">Critical</span>
+                {% elif alert.severity == 'high' %}
+                <span class="badge bg-warning text-dark fs-6">High</span>
+                {% elif alert.severity == 'medium' %}
+                <span class="badge bg-info fs-6">Medium</span>
+                {% else %}
+                <span class="badge bg-success fs-6">Low</span>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <strong class="text-muted">Type:</strong>
+                        <span class="badge bg-secondary ms-2">{{ alert.alert_type|replace('_', ' ')|title }}</span>
+                    </div>
+                    <div class="col-md-6">
+                        <strong class="text-muted">Status:</strong>
+                        {% if alert.is_resolved %}
+                        <span class="badge bg-success ms-2">Resolved</span>
+                        {% else %}
+                        <span class="badge bg-danger ms-2">Active</span>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <strong class="text-muted">Timestamp:</strong>
+                        <span class="ms-2">{{ alert.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</span>
+                    </div>
+                    {% if alert.resolved_at %}
+                    <div class="col-md-6">
+                        <strong class="text-muted">Resolved At:</strong>
+                        <span class="ms-2">{{ alert.resolved_at.strftime('%Y-%m-%d %H:%M:%S') }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <strong class="text-muted">Source IP:</strong>
+                        <code class="ms-2 fs-5">{{ alert.source_ip or 'N/A' }}</code>
+                    </div>
+                    <div class="col-md-6">
+                        <strong class="text-muted">Destination IP:</strong>
+                        <code class="ms-2 fs-5">{{ alert.destination_ip or 'N/A' }}</code>
+                    </div>
+                </div>
+                
+                <hr>
+                
+                <h6><i class="bi bi-info-circle me-2"></i>Description</h6>
+                <div class="alert alert-secondary">
+                    {{ alert.description }}
+                </div>
+                
+                <h6><i class="bi bi-lightbulb me-2"></i>Recommendation</h6>
+                <div class="alert alert-info">
+                    {{ alert.recommendation or 'No specific recommendation provided.' }}
+                </div>
+                
+                {% if not alert.is_resolved %}
+                <form action="{{ url_for('alerts.resolve', alert_id=alert.id) }}" method="POST" class="mt-4">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-success btn-lg">
+                        <i class="bi bi-check-circle me-2"></i>Mark as Resolved
+                    </button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-journal-text me-2"></i>Notes</h5>
+            </div>
+            <div class="card-body">
+                {% if alert.notes %}
+                <div class="notes-content mb-3" style="white-space: pre-wrap; max-height: 300px; overflow-y: auto;">{{ alert.notes }}</div>
+                {% else %}
+                <p class="text-muted mb-3">No notes added yet.</p>
+                {% endif %}
+                
+                <form action="{{ url_for('alerts.add_note', alert_id=alert.id) }}" method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="mb-3">
+                        <textarea name="note" class="form-control" rows="3" placeholder="Add a note..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-plus-circle me-2"></i>Add Note
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
