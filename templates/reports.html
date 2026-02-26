@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+
+{% block title %}Reports{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-file-earmark-pdf me-2"></i>Security Reports</h2>
+    <form action="{{ url_for('reports.generate') }}" method="POST" class="d-inline">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-2"></i>Generate New Report
+        </button>
+    </form>
+</div>
+
+<!-- Weekly Summary -->
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <div class="card bg-gradient" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+            <div class="card-body text-center">
+                <i class="bi bi-exclamation-triangle display-4 mb-2"></i>
+                <h2>{{ weekly_alerts }}</h2>
+                <span>Alerts This Week</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-gradient" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);">
+            <div class="card-body text-center">
+                <i class="bi bi-journal-text display-4 mb-2"></i>
+                <h2>{{ weekly_logs }}</h2>
+                <span>Logs Analyzed</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-gradient" style="background: linear-gradient(135deg, #ee0979 0%, #ff6a00 100%);">
+            <div class="card-body text-center">
+                <i class="bi bi-file-pdf display-4 mb-2"></i>
+                <h2>{{ reports|length }}</h2>
+                <span>Available Reports</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Severity This Week -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="bi bi-bar-chart me-2"></i>Severity Distribution (This Week)</h5>
+    </div>
+    <div class="card-body">
+        <div class="row text-center">
+            <div class="col-3">
+                <div class="display-6 text-danger">{{ severity_counts.get('critical', 0) }}</div>
+                <small class="text-muted">Critical</small>
+            </div>
+            <div class="col-3">
+                <div class="display-6 text-warning">{{ severity_counts.get('high', 0) }}</div>
+                <small class="text-muted">High</small>
+            </div>
+            <div class="col-3">
+                <div class="display-6 text-info">{{ severity_counts.get('medium', 0) }}</div>
+                <small class="text-muted">Medium</small>
+            </div>
+            <div class="col-3">
+                <div class="display-6 text-success">{{ severity_counts.get('low', 0) }}</div>
+                <small class="text-muted">Low</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Available Reports -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="bi bi-folder2-open me-2"></i>Available Reports</h5>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-dark table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Report Name</th>
+                        <th>Generated</th>
+                        <th>Size</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for report in reports %}
+                    <tr>
+                        <td>
+                            <i class="bi bi-file-pdf text-danger me-2"></i>
+                            {{ report.filename }}
+                        </td>
+                        <td>{{ report.created.strftime('%Y-%m-%d %H:%M') }}</td>
+                        <td>{{ (report.size / 1024)|round(1) }} KB</td>
+                        <td>
+                            <a href="{{ url_for('reports.download', filename=report.filename) }}" class="btn btn-sm btn-success">
+                                <i class="bi bi-download me-1"></i>Download
+                            </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4" class="text-center py-5 text-muted">
+                            <i class="bi bi-file-earmark-x display-4 d-block mb-3"></i>
+                            <h5>No reports generated yet</h5>
+                            <p>Click "Generate New Report" to create your first weekly report</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

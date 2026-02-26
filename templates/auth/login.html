@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}Login{% endblock %}
+
+{% block content_noauth %}
+<div class="min-vh-100 d-flex align-items-center justify-content-center">
+    <div class="card shadow-lg" style="width: 400px; max-width: 95%;">
+        <div class="card-body p-5">
+            <div class="text-center mb-4">
+                <i class="bi bi-shield-lock text-primary" style="font-size: 3rem;"></i>
+                <h2 class="mt-3">NIDS Login</h2>
+                <p class="text-muted">Network Intrusion Detection System</p>
+            </div>
+            
+            <form method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                
+                <div class="mb-3">
+                    <label for="username" class="form-label">Username</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-person"></i></span>
+                        <input type="text" class="form-control" id="username" name="username" required autofocus>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="password" class="form-label">Password</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-key"></i></span>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                    </div>
+                </div>
+                
+                <div class="mb-3 form-check">
+                    <input type="checkbox" class="form-check-input" id="remember" name="remember">
+                    <label class="form-check-label" for="remember">Remember me</label>
+                </div>
+                
+                <button type="submit" class="btn btn-primary w-100 py-2">
+                    <i class="bi bi-box-arrow-in-right me-2"></i>Login
+                </button>
+            </form>
+            
+            <hr class="my-4">
+            
+            <p class="text-center mb-0">
+                Don't have an account? <a href="{{ url_for('auth.register') }}">Register</a>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,206 @@
+{% extends "base.html" %}
+
+{% block title %}Network Packet Capture{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-broadcast me-2"></i>Live Network Capture</h2>
+    <a href="{{ url_for('admin.index') }}" class="btn btn-outline-light">
+        <i class="bi bi-arrow-left me-2"></i>Back to Admin
+    </a>
+</div>
+
+{% if not status.available %}
+<div class="alert alert-danger">
+    <i class="bi bi-exclamation-triangle me-2"></i>
+    <strong>Scapy not available!</strong> Install with: <code>pip install scapy</code>
+</div>
+{% endif %}
+
+<!-- Status and Controls -->
+<div class="row g-4 mb-4">
+    <div class="col-md-6">
+        <div class="card {{ 'border-success' if status.running else 'border-secondary' }}">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-{{ 'broadcast text-success' if status.running else 'stop-circle text-secondary' }} me-2"></i>
+                    Capture Status
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    {% if status.running %}
+                    <span class="badge bg-success fs-5 pulse">
+                        <i class="bi bi-circle-fill"></i> Capturing
+                    </span>
+                    <span class="ms-3 text-muted">on {{ status.interface }}</span>
+                    {% else %}
+                    <span class="badge bg-secondary fs-5">
+                        <i class="bi bi-stop-circle"></i> Stopped
+                    </span>
+                    {% endif %}
+                </div>
+                
+                {% if not status.running %}
+                <form action="{{ url_for('capture.start') }}" method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="mb-3">
+                        <label class="form-label">Network Interface</label>
+                        <select name="interface" class="form-select" {% if not status.available %}disabled{% endif %}>
+                            {% for iface in status.interfaces %}
+                            <option value="{{ iface }}">{{ iface }}</option>
+                            {% else %}
+                            <option value="">No interfaces available</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">BPF Filter (optional)</label>
+                        <input type="text" name="filter" class="form-control" 
+                               placeholder="e.g., tcp port 80 or host 192.168.1.1"
+                               {% if not status.available %}disabled{% endif %}>
+                        <div class="form-text">Berkeley Packet Filter expression</div>
+                    </div>
+                    <button type="submit" class="btn btn-success" 
+                            {% if not status.available %}disabled{% endif %}>
+                        <i class="bi bi-play-fill me-2"></i>Start Capture
+                    </button>
+                </form>
+                {% else %}
+                <form action="{{ url_for('capture.stop') }}" method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-stop-fill me-2"></i>Stop Capture
+                    </button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-bar-chart me-2"></i>Live Statistics</h5>
+            </div>
+            <div class="card-body">
+                {% if status.running and status.stats %}
+                <div class="row text-center mb-3">
+                    <div class="col-4">
+                        <div class="display-6 text-primary" id="stat-packets">{{ status.stats.packet_count }}</div>
+                        <small class="text-muted">Packets</small>
+                    </div>
+                    <div class="col-4">
+                        <div class="display-6 text-info" id="stat-bytes">{{ (status.stats.bytes_captured / 1024)|round(1) }}</div>
+                        <small class="text-muted">KB Captured</small>
+                    </div>
+                    <div class="col-4">
+                        <div class="display-6 text-success" id="stat-pps">{{ status.stats.packets_per_second|round(1) }}</div>
+                        <small class="text-muted">Packets/sec</small>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <strong>Protocol Distribution:</strong>
+                    <div class="mt-2" id="protocol-bars">
+                        {% for proto, count in status.stats.protocol_stats.items() %}
+                        <div class="d-flex align-items-center mb-1">
+                            <span class="badge bg-secondary me-2" style="width: 60px;">{{ proto }}</span>
+                            <div class="progress flex-grow-1" style="height: 20px;">
+                                <div class="progress-bar" style="width: {{ (count / status.stats.packet_count * 100)|round }}%">
+                                    {{ count }}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% else %}
+                <div class="text-center py-4 text-muted">
+                    <i class="bi bi-graph-up display-4 d-block mb-2"></i>
+                    <p>Start capture to see live statistics</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Info and Warning -->
+<div class="row g-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>How It Works</h5>
+            </div>
+            <div class="card-body">
+                <ol class="mb-0">
+                    <li class="mb-2">Select a <strong>network interface</strong> to capture from</li>
+                    <li class="mb-2">Optionally set a <strong>BPF filter</strong> to capture specific traffic</li>
+                    <li class="mb-2">Click <strong>Start Capture</strong> to begin monitoring</li>
+                    <li class="mb-2">Packets are analyzed in <strong>real-time</strong> by the detection engine</li>
+                    <li class="mb-2"><strong>Alerts are generated</strong> for suspicious patterns</li>
+                    <li>All data is <strong>saved to the database</strong> for later analysis</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0"><i class="bi bi-exclamation-triangle me-2"></i>Important Notes</h5>
+            </div>
+            <div class="card-body">
+                <ul class="mb-0">
+                    <li class="mb-2"><strong>Administrator privileges required</strong> - Run the application as admin</li>
+                    <li class="mb-2"><strong>High traffic networks</strong> - Use filters to reduce data volume</li>
+                    <li class="mb-2"><strong>Database storage</strong> - Captured packets are stored, monitor disk usage</li>
+                    <li class="mb-2"><strong>Performance</strong> - Capturing may impact network performance on busy networks</li>
+                </ul>
+                
+                <hr>
+                <h6>Example BPF Filters:</h6>
+                <ul class="small mb-0">
+                    <li><code>tcp port 80</code> - HTTP traffic only</li>
+                    <li><code>host 192.168.1.100</code> - Traffic to/from specific host</li>
+                    <li><code>not port 22</code> - Exclude SSH traffic</li>
+                    <li><code>tcp and port 443</code> - HTTPS traffic</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+{% if status.running %}
+// Auto-refresh stats every 2 seconds
+setInterval(function() {
+    fetch('{{ url_for("capture.stats") }}')
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('stat-packets').textContent = data.packet_count.toLocaleString();
+            document.getElementById('stat-bytes').textContent = (data.bytes_captured / 1024).toFixed(1);
+            document.getElementById('stat-pps').textContent = data.packets_per_second.toFixed(1);
+            
+            // Update protocol bars
+            let barsHtml = '';
+            const total = data.packet_count || 1;
+            for (const [proto, count] of Object.entries(data.protocol_stats)) {
+                const pct = Math.round(count / total * 100);
+                barsHtml += `
+                    <div class="d-flex align-items-center mb-1">
+                        <span class="badge bg-secondary me-2" style="width: 60px;">${proto}</span>
+                        <div class="progress flex-grow-1" style="height: 20px;">
+                            <div class="progress-bar" style="width: ${pct}%">${count}</div>
+                        </div>
+                    </div>`;
+            }
+            document.getElementById('protocol-bars').innerHTML = barsHtml;
+        })
+        .catch(err => console.error('Error fetching stats:', err));
+}, 2000);
+{% endif %}
+</script>
+{% endblock %}

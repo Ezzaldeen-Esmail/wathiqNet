@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+
+{% block title %}Log Watcher Control{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-eye me-2"></i>Real-Time Log Watcher</h2>
+    <a href="{{ url_for('admin.index') }}" class="btn btn-outline-light">
+        <i class="bi bi-arrow-left me-2"></i>Back to Admin
+    </a>
+</div>
+
+<!-- Status Card -->
+<div class="row g-4 mb-4">
+    <div class="col-md-6">
+        <div class="card {{ 'border-success' if status.running else 'border-danger' }}">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-{{ 'play-circle-fill text-success' if status.running else 'stop-circle text-danger' }} me-2"></i>
+                    Watcher Status
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="me-3">
+                        {% if status.running %}
+                        <span class="badge bg-success fs-5 pulse">
+                            <i class="bi bi-circle-fill"></i> Running
+                        </span>
+                        {% else %}
+                        <span class="badge bg-danger fs-5">
+                            <i class="bi bi-stop-circle"></i> Stopped
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <strong>Watch Folder:</strong>
+                    <code class="d-block mt-1 p-2 bg-dark rounded">{{ watch_folder }}</code>
+                </div>
+                
+                <div class="d-flex gap-2">
+                    {% if status.running %}
+                    <form action="{{ url_for('watcher.stop') }}" method="POST" class="d-inline">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bi bi-stop-fill me-2"></i>Stop Watcher
+                        </button>
+                    </form>
+                    {% else %}
+                    <form action="{{ url_for('watcher.start') }}" method="POST" class="d-inline">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-play-fill me-2"></i>Start Watcher
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>How It Works</h5>
+            </div>
+            <div class="card-body">
+                <ol class="mb-0">
+                    <li class="mb-2">
+                        <strong>Drop log files</strong> into the watch folder
+                    </li>
+                    <li class="mb-2">
+                        The watcher <strong>detects new files</strong> and changes automatically
+                    </li>
+                    <li class="mb-2">
+                        Logs are <strong>parsed and analyzed</strong> by the detection engine
+                    </li>
+                    <li class="mb-2">
+                        <strong>Alerts are generated</strong> for suspicious activity
+                    </li>
+                    <li>
+                        <strong>Real-time updates</strong> are pushed to all connected browsers
+                    </li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Supported Formats -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="bi bi-file-earmark-code me-2"></i>Supported Log Formats</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card bg-dark h-100">
+                    <div class="card-body">
+                        <h6><i class="bi bi-filetype-csv text-success me-2"></i>CSV Files (.csv)</h6>
+                        <pre class="small bg-black p-2 rounded"><code>timestamp,source_ip,destination_ip,source_port,destination_port,protocol,packet_size,flags,action,device_id
+2024-01-15 08:00:01,192.168.1.100,10.0.0.1,54321,443,TCP,1500,SYN,allow,router-01</code></pre>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card bg-dark h-100">
+                    <div class="card-body">
+                        <h6><i class="bi bi-filetype-json text-warning me-2"></i>JSON Files (.json)</h6>
+                        <pre class="small bg-black p-2 rounded"><code>{"timestamp": "2024-01-15T08:00:01",
+ "source_ip": "192.168.1.100",
+ "destination_ip": "10.0.0.1",
+ "protocol": "TCP",
+ "action": "allow"}</code></pre>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card bg-dark h-100">
+                    <div class="card-body">
+                        <h6><i class="bi bi-file-text text-info me-2"></i>Log Files (.log)</h6>
+                        <pre class="small bg-black p-2 rounded"><code>Jan 15 08:00:01 firewall kernel: 
+  DROP IN=eth0 OUT= 
+  SRC=192.168.1.100 
+  DST=10.0.0.1 PROTO=TCP</code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Test Section -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="bi bi-lightning me-2"></i>Quick Test</h5>
+    </div>
+    <div class="card-body">
+        <p>To test real-time monitoring:</p>
+        <ol>
+            <li>Make sure the watcher is running (green status above)</li>
+            <li>Open the <a href="{{ url_for('dashboard.index') }}" class="text-info">Dashboard</a> in another tab</li>
+            <li>Copy the sample log file to the watch folder:
+                <pre class="bg-dark p-2 rounded mt-2"><code>copy "data\sample_logs.csv" "{{ watch_folder }}\test_logs.csv"</code></pre>
+            </li>
+            <li>Watch the dashboard update in real-time!</li>
+        </ol>
+    </div>
+</div>
+{% endblock %}

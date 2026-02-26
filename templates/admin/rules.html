@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block title %}Detection Rules{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-shield-check me-2"></i>Detection Rules</h2>
+    <a href="{{ url_for('admin.index') }}" class="btn btn-outline-light">
+        <i class="bi bi-arrow-left me-2"></i>Back to Admin
+    </a>
+</div>
+
+<div class="row g-4">
+    <!-- Add Rule Form -->
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-plus-circle me-2"></i>Add New Rule</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('admin.add_rule') }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="mb-3">
+                        <label class="form-label">Rule Name</label>
+                        <input type="text" name="name" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Rule Type</label>
+                        <select name="rule_type" class="form-select" required>
+                            <option value="traffic_spike">Traffic Spike</option>
+                            <option value="brute_force">Brute Force Detection</option>
+                            <option value="port_scan">Port Scan Detection</option>
+                            <option value="suspicious_ip">Suspicious IP</option>
+                            <option value="protocol_anomaly">Protocol Anomaly</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea name="description" class="form-control" rows="2"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Severity</label>
+                        <select name="severity" class="form-select">
+                            <option value="low">Low</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="high">High</option>
+                            <option value="critical">Critical</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Threshold</label>
+                        <input type="number" name="threshold" class="form-control" value="10" min="1">
+                        <div class="form-text">Number of events to trigger alert</div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Time Window (seconds)</label>
+                        <input type="number" name="time_window" class="form-control" value="60" min="1">
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-plus-circle me-2"></i>Add Rule
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Rules List -->
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-list-ul me-2"></i>Active Rules</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Rule Name</th>
+                                <th>Type</th>
+                                <th>Severity</th>
+                                <th>Threshold</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for rule in rules %}
+                            <tr>
+                                <td>
+                                    <strong>{{ rule.name }}</strong>
+                                    {% if rule.description %}
+                                    <br><small class="text-muted">{{ rule.description[:50] }}</small>
+                                    {% endif %}
+                                </td>
+                                <td><span class="badge bg-secondary">{{ rule.rule_type|replace('_', ' ')|title }}</span></td>
+                                <td>
+                                    {% if rule.severity == 'critical' %}
+                                    <span class="badge bg-danger">Critical</span>
+                                    {% elif rule.severity == 'high' %}
+                                    <span class="badge bg-warning text-dark">High</span>
+                                    {% elif rule.severity == 'medium' %}
+                                    <span class="badge bg-info">Medium</span>
+                                    {% else %}
+                                    <span class="badge bg-success">Low</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ rule.threshold }} / {{ rule.time_window }}s</td>
+                                <td>
+                                    {% if rule.enabled %}
+                                    <span class="badge bg-success">Enabled</span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">Disabled</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <form action="{{ url_for('admin.toggle_rule', rule_id=rule.id) }}" method="POST" class="d-inline">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                        <button type="submit" class="btn btn-sm btn-outline-{{ 'warning' if rule.enabled else 'success' }}" title="Toggle">
+                                            <i class="bi bi-toggle-{{ 'on' if rule.enabled else 'off' }}"></i>
+                                        </button>
+                                    </form>
+                                    <form action="{{ url_for('admin.delete_rule', rule_id=rule.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Delete this rule?')">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="6" class="text-center py-4 text-muted">
+                                    No detection rules configured. Add a rule to get started.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
