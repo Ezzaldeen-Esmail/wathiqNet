@@ -15,6 +15,8 @@ class User(UserMixin, db.Model):
     last_login = db.Column(db.DateTime)
     is_active = db.Column(db.Boolean, default=True)
     
+
+    
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
     

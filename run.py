@@ -37,7 +37,7 @@ def init_monitoring():
 
 if __name__ == '__main__':
     print("=" * 60)
-    print("NIDS - Network Intrusion Detection System")
+    print("WathiqNet - Network Intrusion Detection System")
     print("=" * 60)
     print("Starting server...")
     print("Access the application at: http://localhost:5000")

@@ -71,7 +71,7 @@ def create_app(config_class=Config):
         if not User.query.filter_by(username='admin').first():
             admin = User(
                 username='admin',
-                email='admin@nids.local',
+                email='admin@wathiqnet.local',
                 role='admin'
             )
             admin.set_password('admin123')

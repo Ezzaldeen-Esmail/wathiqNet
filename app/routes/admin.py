@@ -8,6 +8,8 @@ from app.models.log_entry import LogEntry
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 
+
+
 def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -17,9 +19,12 @@ def admin_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+
+
 @admin_bp.route('/')
 @login_required
 @admin_required
+
 def index():
     """Admin dashboard"""
     users = User.query.all()
@@ -31,6 +36,10 @@ def index():
                          rules=rules,
                          total_logs=total_logs)
 
+
+
+
+
 # User Management
 @admin_bp.route('/users')
 @login_required
@@ -38,6 +47,10 @@ def index():
 def users():
     users = User.query.all()
     return render_template('admin/users.html', users=users)
+
+
+
+
 
 @admin_bp.route('/users/add', methods=['POST'])
 @login_required

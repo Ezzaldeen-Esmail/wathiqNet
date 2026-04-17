@@ -1,4 +1,4 @@
-# Network Intrusion Detection System (NIDS)
+# Network Intrusion Detection System (WathiqNet)
 
 A comprehensive web-based network security monitoring solution built with Flask, Bootstrap, and PostgreSQL.
 
@@ -53,12 +53,12 @@ A comprehensive web-based network security monitoring solution built with Flask,
 
 4. **Setup PostgreSQL database**
    ```sql
-   CREATE DATABASE nids_db;
+   CREATE DATABASE wathiqnet_db;
    ```
 
 5. **Configure environment** (optional)
    ```bash
-   set DATABASE_URL=postgresql://postgres:password@localhost:5432/nids_db
+   set DATABASE_URL=postgresql://postgres:password@localhost:5432/wathiqnet_db
    set SECRET_KEY=your-secret-key
    ```
 

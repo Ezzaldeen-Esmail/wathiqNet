@@ -21,7 +21,7 @@ def generate_weekly_report():
     start_date = end_date - timedelta(days=7)
     
     # Report filename
-    filename = f"nids_report_{start_date.strftime('%Y%m%d')}_{end_date.strftime('%Y%m%d')}.pdf"
+    filename = f"wathiqnet_report_{start_date.strftime('%Y%m%d')}_{end_date.strftime('%Y%m%d')}.pdf"
     filepath = os.path.join(Config.REPORTS_FOLDER, filename)
     
     # Create PDF
@@ -37,10 +37,13 @@ def generate_weekly_report():
         spaceAfter=30,
         alignment=1  # Center
     )
+    
     story.append(Paragraph("Network Intrusion Detection System", title_style))
     story.append(Paragraph("Weekly Security Report", styles['Heading2']))
     story.append(Paragraph(f"Period: {start_date.strftime('%Y-%m-%d')} to {end_date.strftime('%Y-%m-%d')}", styles['Normal']))
     story.append(Spacer(1, 20))
+
+  
     
     # Executive Summary
     story.append(Paragraph("Executive Summary", styles['Heading2']))
@@ -69,7 +72,7 @@ def generate_weekly_report():
     ).count()
     
     summary_text = f"""
-    During this reporting period, the NIDS system analyzed {total_logs:,} network log entries 
+    During this reporting period, the WathiqNet system analyzed {total_logs:,} network log entries 
     and generated {total_alerts} security alerts. {critical_alerts} alerts were classified as critical, 
     requiring immediate attention. {resolved_alerts} alerts have been resolved.
     """

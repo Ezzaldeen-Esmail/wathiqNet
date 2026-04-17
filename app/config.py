@@ -2,10 +2,10 @@ import os
 from datetime import timedelta
 
 class Config:
-    SECRET_KEY = os.environ.get('SECRET_KEY') or 'nids-secret-key-change-in-production'
+    SECRET_KEY = os.environ.get('SECRET_KEY') or 'wathiqnet-secret-key-change-in-production'
     # Use SQLite for development, set DATABASE_URL for PostgreSQL in production
     basedir = os.path.abspath(os.path.dirname(__file__))
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or f'sqlite:///{os.path.join(basedir, "..", "data", "nids.db")}'
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or f'sqlite:///{os.path.join(basedir, "..", "data", "wathiqnet.db")}'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
     # Session config

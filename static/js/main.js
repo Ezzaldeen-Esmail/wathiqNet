@@ -1,4 +1,4 @@
-// NIDS Main JavaScript
+// WathiqNet Main JavaScript
 
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize Socket.IO connection
